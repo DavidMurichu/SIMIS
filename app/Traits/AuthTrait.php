@@ -3,16 +3,17 @@
 namespace App\Traits;
 
 
-use App\Service\OtpService;
+use App\Mail\RegEmail;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\OtpEmail;
+use App\Models\User;
 use Illuminate\Support\Str; 
 use App\Models\Role;
-use App\Helpers\EncryptionHelper;
-use Illuminate\Http\Request;
+use Carbon\Carbon;
+
 
 
 trait AuthTrait
@@ -43,6 +44,7 @@ trait AuthTrait
             'role' => $role, 
             'active' => $user->active ? 'active' : 'inactive',
             'user_id' => $user->id,
+            'exp' => Carbon::now()->addHours(24)->timestamp
         ];
         return $data;
 
@@ -69,51 +71,90 @@ trait AuthTrait
         return $data;
     }
     }
+
+    public function send_reg_mail( $user, $password){
+        // Send logins via email
+        try {
+        Mail::to($user->email)->send(new RegEmail($user->email, $password));
+        $data=[
+            'message'=>'Login sent to your email. Please check and enter the code to proceed.',
+            'status'=>200
+        ];
+        
+        return $data;
+    } catch (\Exception $e) {
+        Log::error(' sending Login error: ' . $e->getMessage());
+        $data=[
+            'message'=>$e->getMessage(),
+            'status'=>500
+        ];
+        return $data;
+    }
+    }
+    
     
 
 
-    public function getEncryptionKey() {
-        // Retrieve the key from a secure location, such as environment variables or a secure storage
-        return 'Retrieve the key from a secure location, such as environment varia';
-    }
-
 public function handle()
 {
-    $inactiveThreshold = now()->subMinutes(30); // 30 minutes ago
+    $inactiveThreshold = Carbon::now()->subMinutes(5); 
 
-    // Option 1: Using Session (if storing timestamp in session)
-    $lastActive = session()->get('last_active');
-
-    // Option 2: Using Database (if storing timestamp in database)
-    // $lastActive = User::where('id', auth()->user()->id)->pluck('last_active')->first();
+    //Using Database (if storing timestamp in database)
+    $lastActive = User::where('id', auth()->user()->id)->pluck('last_active')->first();
 
     if ($lastActive && $lastActive < $inactiveThreshold) {
-        JWTAuth::invalidate(JWTAuth::getToken()); // Invalidate current token
-        // Optionally, redirect to login page or display a logout message
+        JWTAuth::invalidate(JWTAuth::getToken()); 
     }
 }
 
-
-public function generatee_otpcode($user)
-    {
-        $encryptedData = EncryptionHelper::generateCode($user);
-        return $encryptedData;
-    }
-
-    public function a_decrypt($encryptedData)
-    {
-        $decryptedData = EncryptionHelper::decryptCode($encryptedData);
-        return  $decryptedData;
-    }
 
     public function generate_otpcode($user){
         // Generate and store OTP code
-        $otpCode = Str::random(6);
-        $user->otp_code = $otpCode;
+        $otpCode = $this->generateRandomString();
+        $user->otp_code = $this->encrptCode( $otpCode);
+        $user->otp_expires_at = Carbon::now()->addMinutes(5);
         $user->save();
         return $otpCode;
     }
+
+
+
+    public function generateRandomString()
+{
+    $numbers = str_pad(strval(random_int(100, 999)), 3, '0', STR_PAD_LEFT);
+    $letters = Str::upper(Str::random(3));
+    $randomString = str_shuffle($numbers . $letters);
+    return $randomString;
 }
+
+//encrypt otp data
+public function encrptCode($otpCode){
+    $encryptedcode=hash('sha256', $otpCode);
+    return $encryptedcode;
+}
+
+//generate random email and password
+
+
+
+public function twoFA($user){
+    $otpCode=$this->generate_otpcode($user);
+    $message=$this->send_mail($user, $otpCode);
+
+    $status=$message['status'];
+    $data=[
+        'status'=> $status,
+        'message'=>$message['message'],
+  
+    ];
+    return $data;
+
+}
+
+
+
+}
+
 
 
 
