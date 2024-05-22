@@ -40,7 +40,7 @@ trait AuthTrait
 
         $data=[
             
-            'username' => $user->username,
+            'username' => $user->name,
             'role' => $role, 
             'active' => $user->active ? 'active' : 'inactive',
             'user_id' => $user->id,
@@ -57,7 +57,7 @@ trait AuthTrait
         try {
         Mail::to($user->email)->send(new OtpEmail($otpCode, $user));
         $data=[
-            'message'=>'OTP sent to your email. Please check and enter the code to proceed.',
+            'message'=>'OTP sent to your email use it for validation',
             'status'=>200
         ];
         
@@ -145,7 +145,8 @@ public function twoFA($user){
     $data=[
         'status'=> $status,
         'message'=>$message['message'],
-  
+        'active'=>0,
+        
     ];
     return $data;
 

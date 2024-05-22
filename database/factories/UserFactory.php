@@ -24,12 +24,15 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            // 'name' => 'david',
-            // 'email' => 'hungry124monitor@gmail.com',
-            // 'email_verified_at' => now(),
-            // 'role_id'=>1,
-            // 'password' => 'secret1234',
-            // 'remember_token' => Str::random(10),
+            'phone'=>'0100010000',
+            'fullname'=>'paul webo',
+            'username'=>'paulwebo38@gmail.com',
+            'name' => 'paul',
+            'email' => 'paulwebo38@gmail.com',
+            'email_verified_at' => now(),
+            'role_id'=>1,
+            'password' => 'secret1234',
+            'remember_token' => Str::random(10),
         ];
     }
 

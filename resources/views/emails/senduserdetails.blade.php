@@ -41,7 +41,7 @@
 <body>
     <div class="container">
         <h1>Your Log in details</h1>
-        <p>Hi {{ $user->name }},</p>
+        
         <p>Wlcome to Pefrank your Login details</p>
         <p class="otp-code">Username: {{ $username }}</p>
         <p class="otp-code">Password: {{ $password }}</p>

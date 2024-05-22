@@ -18,6 +18,10 @@ Route::middleware('throttle:apiLimiter')->post("/2FAcode", [VerifyOtpController:
 Route::middleware('throttle:apiLimiter')->post('/login', [LogInController::class, 'login'])->name('login');
 Route::middleware('throttle:apiLimiter')->post("/register", [RegisterController::class, "register"])->name('register');
 Route::post("/logout", [LogOutController::class, 'logout'])->middleware('jwt.auth');
-Route::post("/update/{tableName}/{id}", [SchemaController::class, 'update']);
+
+
+Route::get("/{tableName}", [SchemaController::class, 'get_table_data']);
+Route::post("/edit/{tableName}", [SchemaController::class, 'update']);
+Route::post("/users/deactivate", [SchemaController::class, 'deactivate']);
 
 });

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\auth;
 
+use App\Models\Audits;
 use App\Traits\AuthTrait;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -23,7 +24,6 @@ public function login(Request $request)
 
     try {
         //Step 1 Validate and sanitize request data
-
         $request->validate([
             'email' => ['required', 'email', 'string', 'max:255'],
             'password' => ['required', 'string', 'min:8'],
@@ -32,8 +32,8 @@ public function login(Request $request)
 
         // Find user by email
         $user = User::where('email', strtolower(trim($request->email)))->first();
-
-
+        // $user->active = 0;
+        // $user->save();
         // Check user existence and verify password
         if (! $user || ! Hash::check($request->password, $user->password)) {
             $data=[
@@ -50,13 +50,22 @@ public function login(Request $request)
         return response()->json($data, $data['status']);
     }
 
-   
+
+    $token = JWTAuth::fromUser($user);
+    $auditData=[
+        'user_id' => $user->id,
+        'activity_type' => 'login',
+        'ip_address' => '',
+        'user_agent' => 'nullable|string',
+        'additional_info' => 'nullable|string',
+    ];
+    // create an Audit
+    Audits::create();
     $data=[
         'status'=>200,
-        'activated'=>true,
-        'redirect'=>'mainPage'
+        'active'=>1,
+        'token'=> $token
     ];
-
     return response()->json($data,200);
     
 

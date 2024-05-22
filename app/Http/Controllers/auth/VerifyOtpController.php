@@ -9,6 +9,8 @@ use App\Models\User;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Facades\Log;
+
 
 class VerifyOtpController extends Controller
 {
@@ -18,8 +20,10 @@ class VerifyOtpController extends Controller
     {
         try {
             // Retrieve and hash the OTP code from the request
-            $otpCode = $request->input('code');
+            $otpCode = $request->input('code.verificationCode');
+            
             $userHash = $this->encrptCode($otpCode);
+            Log::info($userHash);
 
             // Find the user based on the hashed OTP code
             $user = User::where('otp_code', $userHash)->first();
@@ -62,6 +66,7 @@ class VerifyOtpController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'message' => $e->getMessage(),
+                'status'=> 500,
             ], 500);
         }
     }

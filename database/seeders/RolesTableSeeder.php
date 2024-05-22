@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Role;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class RolesTableSeeder extends Seeder
@@ -13,7 +12,17 @@ class RolesTableSeeder extends Seeder
      */
     public function run(): void
     {
-        //
-        Role::factory()->count(5)->create();
+        // Define the roles to be inserted
+        $roles = [
+            ['role' => 'Sacco Management Committee'],
+            ['role' => 'Treasurer'],
+            ['role' => 'Members'],
+            ['role' => 'Normal User'],
+        ];
+
+        // Insert the roles into the roles table
+        foreach ($roles as $role) {
+            Role::create($role);
+        }
     }
 }

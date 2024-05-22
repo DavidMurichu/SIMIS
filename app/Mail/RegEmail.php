@@ -13,10 +13,12 @@ class RegEmail extends Mailable
     public $username;
     public $password;
 
+
     public function __construct($username, $password)
     {
         $this->username = $username;
         $this->password = $password;
+        
     }
 
     public function build()
@@ -25,5 +27,6 @@ class RegEmail extends Mailable
                     ->view('emails.senduserdetails') 
                     ->with('username', $this->username)
                     ->with('password', $this->password);
+                   
     }
 }
